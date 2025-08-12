@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Group Chanting Tracker</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #fff;
+      padding: 2rem;
+      max-width: 400px;
+      margin: auto;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    input[type="number"] {
+      font-size: 1rem;
+      padding: 0.5rem;
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+
+    button {
+      font-size: 1rem;
+      padding: 0.5rem 1rem;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    #responseBox {
+      margin-top: 1rem;
+      font-size: 1.2rem;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>Group Chanting Tracker</h1>
+
+  <form id="chantForm">
+    <input type="number" id="minutesInput" placeholder="Enter minutes" required />
+    <button type="submit">Add Minutes</button>
+  </form>
+
+  <div id="responseBox">Total Minutes: loading...</div>
+
+  <script>
+    const responseBox = document.getElementById("responseBox");
+    const minutesInput = document.getElementById("minutesInput");
+
+    const scriptURL = "https://script.google.com/macros/s/AKfycbw6emOLRZlZDJkyqsyC9bThfPNjHvLO3wCAL4GDvVCs9BAHMUHuVIPVMhoy-qaI6fRkFg/exec";
+
+    async function fetchTotal() {
+      try {
+        const res = await fetch(scriptURL + "?minutes=0");
+        const data = await res.json();
+        if (data.totalMinutes !== undefined) {
+          responseBox.innerText = `Total Minutes: ${data.totalMinutes}`;
+        }
+      } catch (err) {
+        responseBox.innerText = "Error loading total.";
+      }
+    }
+
+    document.getElementById("chantForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const minutes = minutesInput.value;
+
+      if (!minutes || isNaN(minutes)) {
+        alert("Please enter a valid number.");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${scriptURL}?minutes=${minutes}`);
+        const data = await res.json();
+
+        if (data.totalMinutes !== undefined) {
+          responseBox.innerText = `Total Minutes: ${data.totalMinutes}`;
+          minutesInput.value = ""; // Clear input box
+        } else {
+          responseBox.innerText = "Error updating total.";
+        }
+      } catch (err) {
+        responseBox.innerText = "Submission failed.";
+      }
+    });
+
+    // Load total on page load
+    fetchTotal();
+  </script>
+</body>
+</html>
